@@ -62,11 +62,30 @@ strong{color:var(--text);font-weight:600;}
 .tos-footer-text{font-size:13px;color:var(--text-muted);line-height:1.6;}
 .tos-footer-text a{color:var(--accent);text-decoration:none;}
 
-.version-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;padding:3px 8px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:4px;color:var(--text-dim);margin-top:8px;}
+.top-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
+.top-nav-logo{display:flex;align-items:center;gap:8px;}
+.top-nav-logo-mark{width:24px;height:24px;background:var(--accent);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--navy);}
+.top-nav-logo-text{font-family:'DM Serif Display',serif;font-size:15px;color:var(--text);letter-spacing:-0.02em;}
+.top-nav-links{display:flex;align-items:center;gap:4px;}
+.top-nav-link{font-size:12px;color:var(--text-muted);text-decoration:none;padding:6px 12px;border-radius:8px;border:1px solid transparent;transition:all 0.2s;display:flex;align-items:center;gap:5px;}
+.top-nav-link:hover{color:var(--text);border-color:var(--border);background:var(--card);}
+.top-nav-link.highlight{border-color:rgba(232,197,71,0.3);color:var(--accent);}
 </style>
 </head>
 <body>
 <div class="container">
+
+  <nav class="top-nav">
+    <div class="top-nav-logo">
+      <div class="top-nav-logo-mark">?</div>
+      <span class="top-nav-logo-text">Why Was I Rejected?</span>
+    </div>
+    <div class="top-nav-links">
+      <a class="top-nav-link" href="index.html">🔍 <span>App</span></a>
+      <a class="top-nav-link" href="manual.html">📖 <span>Manual</span></a>
+      <a class="top-nav-link highlight" href="mailto:peter.jankovic@hotmail.sk">✉ <span>Contact</span></a>
+    </div>
+  </nav>
 
   <header>
     <div class="logo-row">
