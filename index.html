@@ -500,7 +500,19 @@ function buildPrompt(cvText, jdText, liOn, liText) {
   document.getElementById('candidate-loading').classList.add('visible');
   const timer = startLoading(liOn?'li':'cv');
 
-  const prompt = buildPrompt(cvText, jdText, liOn, liText);
+  const prompt = buildPrompt(safeCv, safeJd, liOn, safeLi);
+
+  // Sanitise text to remove characters that break JSON
+  function sanitise(str) {
+    return str
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ')
+      .replace(/\\/g, ' ')
+      .replace(/"/g, "'")
+      .trim();
+  }
+  var safeCv = sanitise(cvText);
+  var safeJd = sanitise(jdText);
+  var safeLi = sanitise(liText || '');
 
   try {
     const resp = await fetch('https://rejection-proxy.dzenk1981.workers.dev/',{
