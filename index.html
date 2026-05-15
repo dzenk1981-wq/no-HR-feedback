@@ -417,12 +417,33 @@ function toggleHRSubmit() {
 }
 
 /* ── FILE UPLOAD ── */
-document.getElementById('file-input').addEventListener('change', async function(e) {
+document.getElementById('file-input').addEventListener('change', function(e) {
   const file = e.target.files[0]; if (!file) return;
   document.getElementById('file-name-display').textContent = file.name;
   document.getElementById('file-name-display').style.display = 'block';
   document.getElementById('upload-area').classList.add('has-file');
-  try { uploadedFileText = await file.text(); } catch(e) { uploadedFileText = `[File: ${file.name}]`; }
+
+  // Use FileReader for broadest browser compatibility
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    uploadedFileText = evt.target.result || '';
+    // Show character count so user knows it worked
+    const chars = uploadedFileText.length;
+    document.getElementById('file-name-display').textContent = file.name + ' (' + chars + ' chars read)';
+  };
+  reader.onerror = function() {
+    uploadedFileText = '';
+    document.getElementById('file-name-display').textContent = file.name + ' — could not read, please paste text instead';
+  };
+  // Read as text — works for .txt; for PDF/DOCX advise pasting
+  reader.readAsText(file);
+
+  // Warn if PDF or DOCX since binary formats need paste fallback
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'pdf' || ext === 'docx' || ext === 'doc') {
+    document.getElementById('file-name-display').textContent = file.name + ' — PDF/DOCX: if blank, paste text below instead';
+    uploadedFileText = '';
+  }
 });
 
 /* ── HELPERS ── */
