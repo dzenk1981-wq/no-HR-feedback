@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Manual — Why Was I Rejected?</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0f1923;--navy-mid:#1a2736;--navy-light:#243347;
+  --accent:#e8c547;--accent-dim:#c9a82a;
+  --red:#e85454;--orange:#e8874a;--green:#4aad7a;--blue:#4a8fe8;--purple:#9b7fe8;
+  --text:#f0ece4;--text-muted:#8a9ab0;--text-dim:#5a6878;
+  --border:rgba(255,255,255,0.07);--border-accent:rgba(232,197,71,0.3);
+  --card:rgba(255,255,255,0.04);--radius:12px;--radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--navy);color:var(--text);font-family:'Instrument Sans',sans-serif;min-height:100vh;line-height:1.7;}
+body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(232,197,71,0.03) 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh;position:relative;z-index:1;}
+@media(max-width:700px){.layout{grid-template-columns:1fr;}}
+
+/* SIDEBAR */
+.sidebar{background:var(--navy-mid);border-right:1px solid var(--border);padding:32px 20px;position:sticky;top:0;height:100vh;overflow-y:auto;}
+@media(max-width:700px){.sidebar{display:none;}}
+.sidebar-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+.logo-mark{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--navy);flex-shrink:0;}
+.logo-text{font-family:'DM Serif Display',serif;font-size:15px;color:var(--text);}
+.nav-section-label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;margin-top:20px;}
+.nav-link{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-muted);text-decoration:none;transition:all 0.2s;cursor:pointer;}
+.nav-link:hover{background:var(--card);color:var(--text);}
+.nav-link.active{background:rgba(232,197,71,0.1);color:var(--accent);}
+.nav-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-dim);text-decoration:none;margin-top:24px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);transition:all 0.2s;}
+.back-btn:hover{color:var(--accent);border-color:var(--border-accent);}
+
+/* MAIN */
+.main{padding:48px 48px 80px;max-width:760px;}
+@media(max-width:900px){.main{padding:32px 24px 60px;}}
+
+/* HEADER */
+.manual-header{margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--border);}
+.manual-eyebrow{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.manual-title{font-family:'DM Serif Display',serif;font-size:clamp(28px,4vw,42px);line-height:1.1;letter-spacing:-0.03em;margin-bottom:12px;}
+.manual-sub{font-size:15px;color:var(--text-muted);line-height:1.6;max-width:540px;}
+.version-row{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;}
+.version-pill{font-family:'DM Mono',monospace;font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid var(--border);color:var(--text-dim);}
+
+/* SECTIONS */
+.manual-section{margin-bottom:56px;scroll-margin-top:32px;}
+.section-tag{display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;}
+.section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.section-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:0.05em;}
+h2{font-family:'DM Serif Display',serif;font-size:26px;letter-spacing:-0.02em;margin-bottom:8px;}
+.section-desc{font-size:15px;color:var(--text-muted);line-height:1.7;margin-bottom:24px;}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column;gap:0;}
+.step{display:flex;gap:16px;position:relative;}
+.step:not(:last-child)::after{content:'';position:absolute;left:15px;top:36px;bottom:-4px;width:1px;background:var(--border);}
+.step-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;flex-shrink:0;border:1px solid;margin-top:2px;}
+.step-body{padding-bottom:24px;flex:1;}
+.step-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.4;}
+.step-desc{font-size:14px;color:var(--text-muted);line-height:1.65;}
+.step-desc strong{color:var(--text);}
+.step-desc code{font-family:'DM Mono',monospace;font-size:12px;background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px;color:var(--accent);}
+
+/* STEP COLOURS */
+.step-blue .step-num{background:rgba(74,143,232,0.1);border-color:rgba(74,143,232,0.3);color:var(--blue);}
+.step-green .step-num{background:rgba(74,173,122,0.1);border-color:rgba(74,173,122,0.3);color:var(--green);}
+.step-amber .step-num{background:rgba(232,197,71,0.1);border-color:rgba(232,197,71,0.3);color:var(--accent);}
+.step-purple .step-num{background:rgba(155,127,232,0.1);border-color:rgba(155,127,232,0.3);color:var(--purple);}
+.step-orange .step-num{background:rgba(232,135,74,0.1);border-color:rgba(232,135,74,0.3);color:var(--orange);}
+
+/* TIPS & WARNINGS */
+.tip-box{border-radius:var(--radius-sm);padding:14px 16px;margin:16px 0;display:flex;gap:12px;align-items:flex-start;}
+.tip-box.tip{background:rgba(74,173,122,0.07);border-left:3px solid var(--green);}
+.tip-box.warning{background:rgba(232,135,74,0.07);border-left:3px solid var(--orange);}
+.tip-box.info{background:rgba(74,143,232,0.07);border-left:3px solid var(--blue);}
+.tip-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.tip-text{font-size:13px;color:var(--text-muted);line-height:1.65;}
+.tip-text strong{color:var(--text);}
+
+/* FEATURE CARD */
+.feature-overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:32px;}
+.feature-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;}
+.feature-card-icon{font-size:20px;margin-bottom:8px;}
+.feature-card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.feature-card-desc{font-size:12px;color:var(--text-muted);line-height:1.5;}
+
+/* RESULT ANATOMY */
+.result-anatomy{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin:16px 0;}
+.anatomy-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);}
+.anatomy-row:last-child{border-bottom:none;padding-bottom:0;}
+.anatomy-label{font-size:12px;font-weight:600;color:var(--text);min-width:140px;flex-shrink:0;}
+.anatomy-desc{font-size:13px;color:var(--text-muted);line-height:1.5;}
+.anatomy-tag{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;padding:2px 7px;border-radius:4px;margin-right:4px;}
+.tag-red{background:rgba(232,84,84,0.1);color:#f09090;border:1px solid rgba(232,84,84,0.3);}
+.tag-orange{background:rgba(232,135,74,0.1);color:#f0a87a;border:1px solid rgba(232,135,74,0.3);}
+.tag-green{background:rgba(74,173,122,0.1);color:#7acca0;border:1px solid rgba(74,173,122,0.3);}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:48px 0;}
+
+/* FAQ */
+.faq-list{display:flex;flex-direction:column;gap:16px;}
+.faq-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;}
+.faq-q{padding:14px 16px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.faq-q::after{content:'↓';font-family:'DM Mono',monospace;font-size:12px;color:var(--text-dim);flex-shrink:0;}
+.faq-a{padding:0 16px 14px;font-size:14px;color:var(--text-muted);line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR NAV -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">?</div>
+      <span class="logo-text">User Manual</span>
+    </div>
+
+    <div class="nav-section-label">Getting started</div>
+    <a class="nav-link active" onclick="scrollTo('overview')"><span class="nav-dot" style="background:#4a8fe8;"></span>Overview</a>
+    <a class="nav-link" onclick="scrollTo('feature1')"><span class="nav-dot" style="background:#4a8fe8;"></span>Feature 1 — CV Analysis</a>
+
+    <div class="nav-section-label">Features</div>
+    <a class="nav-link" onclick="scrollTo('feature2')"><span class="nav-dot" style="background:#0a66c2;"></span>Feature 2 — LinkedIn Review</a>
+    <a class="nav-link" onclick="scrollTo('feature3')"><span class="nav-dot" style="background:#4aad7a;"></span>Feature 3 — HR Submission</a>
+    <a class="nav-link" onclick="scrollTo('feature4')"><span class="nav-dot" style="background:#4aad7a;"></span>Feature 4 — Check Feedback</a>
+    <a class="nav-link" onclick="scrollTo('feature5')"><span class="nav-dot" style="background:#e8c547;"></span>Feature 5 — HR Dashboard</a>
+
+    <div class="nav-section-label">Reference</div>
+    <a class="nav-link" onclick="scrollTo('results')"><span class="nav-dot" style="background:#9b7fe8;"></span>Reading your results</a>
+    <a class="nav-link" onclick="scrollTo('faq')"><span class="nav-dot" style="background:#e8874a;"></span>FAQ</a>
+
+    <a class="back-btn" href="index.html">← Back to app</a>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- HEADER -->
+    <div class="manual-header">
+      <div class="manual-eyebrow">User Manual</div>
+      <div class="manual-title">How to use<br>Why Was I Rejected?</div>
+      <div class="manual-sub">A step-by-step guide to every feature — written for people who just want to use the tool, not read documentation.</div>
+      <div class="version-row">
+        <span class="version-pill">Version 1.0</span>
+        <span class="version-pill">May 2026</span>
+        <span class="version-pill">Created by Peter Jankovič</span>
+      </div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="manual-section" id="overview">
+      <div class="section-tag">
+        <div class="section-icon" style="background:rgba(232,197,71,0.1);">🗺️</div>
+        <span class="section-num">Overview</span>
+      </div>
+      <h2>What this tool does</h2>
+      <div class="section-desc">You paste your CV and a job description. The tool tells you — honestly — why you were probably rejected. No sugarcoating. No generic advice. You can also get a real human HR professional to review your application and leave written feedback.</div>
+
+      <div class="feature-overview">
+        <div class="feature-card">
+          <div class="feature-card-icon">🔍</div>
+          <div class="feature-card-title">CV Analysis</div>
+          <div class="feature-card-desc">AI compares your CV against the job description and returns an ATS score, keyword gaps, and ranked rejection reasons.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-icon">💼</div>
+          <div class="feature-card-title">LinkedIn Review</div>
+          <div class="feature-card-desc">Paste your LinkedIn profile alongside your CV. The tool checks consistency and flags what's missing from your profile.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-icon">👥</div>
+          <div class="feature-card-title">HR Feedback</div>
+          <div class="feature-card-desc">Submit anonymously for a real HR professional to read your application and leave written feedback.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-icon">📊</div>
+          <div class="feature-card-title">HR Dashboard</div>
+          <div class="feature-card-desc">HR professionals access a private dashboard to review submissions and write feedback for candidates.</div>
+        </div>
+      </div>
+
+      <div class="tip-box info">
+        <div class="tip-icon">ℹ️</div>
+        <div class="tip-text"><strong>No account needed.</strong> You can run a full CV analysis without signing up for anything. Only HR reviewers need an access code.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- FEATURE 1 — CV ANALYSIS -->
+    <div class="manual-section" id="feature1">
+      <div class="section-tag">
+        <div class="section-icon" style="background:rgba(74,143,232,0.1);">🔍</div>
+        <span class="section-num">Feature 1</span>
+      </div>
+      <h2>CV & Job Description Analysis</h2>
+      <div class="section-desc">The core feature. Paste your CV and the job description you applied for and get an honest AI analysis of why you were likely rejected.</div>
+
+      <div class="steps">
+
+        <div class="step step-blue">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Open the app and stay on the Candidate tab</div>
+            <div class="step-desc">When the app loads you will see three tabs at the top: <strong>Candidate</strong>, <strong>Check HR Feedback</strong>, and <strong>HR Reviewer</strong>. You are already on the right one — Candidate.</div>
+          </div>
+        </div>
+
+        <div class="step step-blue">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Add your CV — upload or paste</div>
+            <div class="step-desc">
+              You have two options:<br><br>
+              <strong>Option A — Upload a file:</strong> Click the upload box on the left side. Select your CV file. Supported formats: <code>.pdf</code> <code>.docx</code> <code>.txt</code>. Your filename appears in green when uploaded successfully.<br><br>
+              <strong>Option B — Paste text:</strong> Click inside the text area below the upload box. Copy your CV from Word or any other document and paste it directly.
+            </div>
+            <div class="tip-box tip">
+              <div class="tip-icon">💡</div>
+              <div class="tip-text"><strong>Tip:</strong> Pasting text gives the most accurate results. If uploading a PDF, the tool reads it as plain text — make sure your CV is not a scanned image.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step step-blue">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Paste the job description</div>
+            <div class="step-desc">On the right side you will see a large text area labelled <strong>Job Description</strong>. Go to the job posting — on LinkedIn, a company website, or any job board — select all the text and paste it here. Include everything: the intro, responsibilities, requirements, and nice-to-haves. More text gives better results.</div>
+            <div class="tip-box warning">
+              <div class="tip-icon">⚠️</div>
+              <div class="tip-text"><strong>Important:</strong> Do not paste a job title only. The tool needs the full description to analyse keyword gaps accurately.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step step-blue">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Click "Analyse my application →"</div>
+            <div class="step-desc">The yellow button at the bottom. The tool will show a loading screen with status messages while it processes. This takes <strong>10–20 seconds</strong>. Do not close the browser tab during this time.</div>
+          </div>
+        </div>
+
+        <div class="step step-blue">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">Read your results</div>
+            <div class="step-desc">Your results appear on the same page. You will see your ATS score, the most likely rejection reasons ranked 1–4, keyword gaps, and five specific things to fix. See the <strong>Reading your results</strong> section below for a full explanation of each part.</div>
+          </div>
+        </div>
+
+        <div class="step step-blue">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <div class="step-title">Analyse another application</div>
+            <div class="step-desc">Scroll to the bottom of your results and click <strong>"← Analyse another application"</strong>. All fields are cleared and you can start again with a new CV or job description.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- FEATURE 2 — LINKEDIN -->
+    <div class="manual-section" id="feature2">
+      <div class="section-tag">
+        <div class="section-icon" style="background:rgba(10,102,194,0.1);">💼</div>
+        <span class="section-num">Feature 2</span>
+      </div>
+      <h2>LinkedIn Profile Review</h2>
+      <div class="section-desc">Activate this alongside your CV analysis to check whether your LinkedIn profile is consistent with your CV and optimised for the role you applied for.</div>
+
+      <div class="steps">
+
+        <div class="step step-purple">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Complete steps 1–3 of the CV Analysis first</div>
+            <div class="step-desc">Add your CV and job description before activating LinkedIn review. The LinkedIn analysis runs alongside the CV analysis — not separately.</div>
+          </div>
+        </div>
+
+        <div class="step step-purple">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Turn on the LinkedIn toggle</div>
+            <div class="step-desc">Below the job description box you will see a toggle switch labelled <strong>"Also review my LinkedIn profile"</strong>. Click it to switch it on. A blue section will appear below with instructions and two fields.</div>
+          </div>
+        </div>
+
+        <div class="step step-purple">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Copy your LinkedIn profile text</div>
+            <div class="step-desc">
+              Go to your LinkedIn profile. Copy the text in one of these ways:<br><br>
+              <strong>Option A — Save as PDF:</strong> On your LinkedIn profile click <strong>More</strong> → <strong>Save to PDF</strong>. Open the PDF, select all text (<code>Ctrl+A</code> or <code>Cmd+A</code>), copy and paste into the text area.<br><br>
+              <strong>Option B — Manual copy:</strong> On your LinkedIn profile, copy your headline, your About section, and each experience entry one by one. Paste them all into the text area.
+            </div>
+            <div class="tip-box tip">
+              <div class="tip-icon">💡</div>
+              <div class="tip-text"><strong>Tip:</strong> The more of your LinkedIn profile you paste, the more accurate the comparison. At minimum include your headline, About section, and your two most recent roles.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step step-purple">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Optionally paste your LinkedIn URL</div>
+            <div class="step-desc">The URL field above the text area is optional. You can paste your LinkedIn URL there (e.g. <code>linkedin.com/in/yourname</code>) for reference — it is included in your results but not used for analysis.</div>
+          </div>
+        </div>
+
+        <div class="step step-purple">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">Click "Analyse my application →"</div>
+            <div class="step-desc">The analysis now runs on both your CV and your LinkedIn profile together. Your results will include a <strong>second score</strong> specifically for LinkedIn, a comparison between your CV and profile, LinkedIn-specific keyword gaps, and LinkedIn strengths.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- FEATURE 3 — HR SUBMISSION -->
+    <div class="manual-section" id="feature3">
+      <div class="section-tag">
+        <div class="section-icon" style="background:rgba(74,173,122,0.1);">📨</div>
+        <span class="section-num">Feature 3</span>
+      </div>
+      <h2>Submit for HR Professional Feedback</h2>
+      <div class="section-desc">After the AI analysis, you can also have a real human HR professional review your application and leave written feedback. This is optional and anonymous.</div>
+
+      <div class="steps">
+
+        <div class="step step-green">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Complete steps 1–3 of the CV Analysis first</div>
+            <div class="step-desc">Add your CV and job description before enabling HR submission. The HR submission happens at the same time as the analysis — not separately.</div>
+          </div>
+        </div>
+
+        <div class="step step-green">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Turn on the HR feedback toggle</div>
+            <div class="step-desc">Below the LinkedIn toggle you will see a second toggle labelled <strong>"Submit for HR professional feedback"</strong>. Click it to switch it on. A field will appear asking for your name or alias.</div>
+          </div>
+        </div>
+
+        <div class="step step-green">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Enter your name or alias</div>
+            <div class="step-desc">Type your name, initials, or any alias you choose. This is shown to the HR reviewer so they know who they are giving feedback to. You can stay fully anonymous by typing something like <strong>"Anonymous"</strong> or <strong>"Candidate A"</strong>.</div>
+            <div class="tip-box info">
+              <div class="tip-icon">ℹ️</div>
+              <div class="tip-text"><strong>What is stored:</strong> Your name/alias, the first 600 characters of your CV, the first 400 characters of the job description, and the AI analysis result. Your full CV is not stored.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step step-green">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Click "Analyse my application →"</div>
+            <div class="step-desc">The analysis runs and your submission is saved to the HR reviewer queue at the same time. This adds 1–2 seconds to the loading time.</div>
+          </div>
+        </div>
+
+        <div class="step step-green">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">Save your Submission ID</div>
+            <div class="step-desc">After your results appear, a green banner will show your unique <strong>Submission ID</strong> — for example <code>sub_4f7a2c1b</code>. <strong>Copy this and save it somewhere safe.</strong> You will need it to check for HR feedback. It is not stored anywhere else and cannot be recovered if lost.</div>
+            <div class="tip-box warning">
+              <div class="tip-icon">⚠️</div>
+              <div class="tip-text"><strong>Important:</strong> If you lose your Submission ID you cannot retrieve your HR feedback. Save it in your notes, email it to yourself, or screenshot it immediately.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- FEATURE 4 — CHECK FEEDBACK -->
+    <div class="manual-section" id="feature4">
+      <div class="section-tag">
+        <div class="section-icon" style="background:rgba(74,173,122,0.1);">📬</div>
+        <span class="section-num">Feature 4</span>
+      </div>
+      <h2>Checking for HR Feedback</h2>
+      <div class="section-desc">Once you have submitted for HR review and saved your Submission ID, you can check back at any time to see if a reviewer has left feedback.</div>
+
+      <div class="steps">
+
+        <div class="step step-green">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Click the "Check HR Feedback" tab</div>
+            <div class="step-desc">At the top of the app you will see three tabs. Click <strong>Check HR Feedback</strong> — the middle tab with a green dot.</div>
+          </div>
+        </div>
+
+        <div class="step step-green">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Enter your Submission ID</div>
+            <div class="step-desc">Type or paste your Submission ID into the field. It looks like <code>sub_4f7a2c1b</code>. It is case-sensitive — copy it exactly as it appeared in your results.</div>
+          </div>
+        </div>
+
+        <div class="step step-green">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Click "Check for feedback →"</div>
+            <div class="step-desc">
+              Two outcomes are possible:<br><br>
+              <strong>Feedback received:</strong> A green box appears showing the HR reviewer's written feedback, their name, and the date they responded.<br><br>
+              <strong>Pending:</strong> An orange box appears telling you your submission is in the queue but no feedback has been left yet. Check back in 24–48 hours.
+            </div>
+          </div>
+        </div>
+
+        <div class="step step-green">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Check back as many times as you need</div>
+            <div class="step-desc">There is no limit on how many times you can check. Your Submission ID remains valid indefinitely. HR reviewers are volunteers — response times vary, but most submissions receive feedback within 48 hours.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- FEATURE 5 — HR DASHBOARD -->
+    <div class="manual-section" id="feature5">
+      <div class="section-tag">
+        <div class="section-icon" style="background:rgba(232,197,71,0.1);">📊</div>
+        <span class="section-num">Feature 5</span>
+      </div>
+      <h2>HR Reviewer Dashboard</h2>
+      <div class="section-desc">For HR professionals, recruiters, and hiring managers who have been invited to review candidate submissions. You need an access code to enter.</div>
+
+      <div class="steps">
+
+        <div class="step step-amber">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Click the "HR Reviewer" tab</div>
+            <div class="step-desc">At the top of the app click the <strong>HR Reviewer</strong> tab — the rightmost tab with a yellow dot. You will see the login form.</div>
+          </div>
+        </div>
+
+        <div class="step step-amber">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Enter your name</div>
+            <div class="step-desc">Type your name in the first field. This is shown to candidates when they receive your feedback — for example <strong>"Sarah — Senior Recruiter"</strong> or simply your first name. Be as specific or as anonymous as you prefer.</div>
+          </div>
+        </div>
+
+        <div class="step step-amber">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Enter the access code and log in</div>
+            <div class="step-desc">Enter the access code provided to you by the tool administrator. Click <strong>"Enter dashboard →"</strong> or press Enter. If the code is correct you will be taken to the submission dashboard immediately.</div>
+            <div class="tip-box info">
+              <div class="tip-icon">ℹ️</div>
+              <div class="tip-text">If you need the access code and have not received it, contact <strong>peter.jankovic@hotmail.sk</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step step-amber">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Browse submissions</div>
+            <div class="step-desc">The dashboard shows all candidate submissions sorted by date — newest first. Each card shows the candidate's name, submission date, their unique ID, ATS score, and a short excerpt of the AI verdict. You can see at a glance which submissions already have feedback and which are waiting.</div>
+          </div>
+        </div>
+
+        <div class="step step-amber">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">Click "Review & give feedback" on any submission</div>
+            <div class="step-desc">A panel opens showing the full AI verdict, top rejection reasons, CV excerpt, and job description excerpt. Read through everything before writing your feedback.</div>
+          </div>
+        </div>
+
+        <div class="step step-amber">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <div class="step-title">Write your feedback</div>
+            <div class="step-desc">Type your feedback in the text area at the bottom of the panel. There is no character limit. Be honest and constructive — candidates are looking for real professional perspective, not encouragement. Address the specific gaps the AI identified and add anything you notice that the AI may have missed.</div>
+            <div class="tip-box warning">
+              <div class="tip-icon">⚠️</div>
+              <div class="tip-text"><strong>Reviewer guidelines:</strong> Feedback must be professional and constructive. Do not contact candidates directly. Do not use submission data for recruitment outreach. See the Terms of Service for full reviewer obligations.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step step-amber">
+          <div class="step-num">7</div>
+          <div class="step-body">
+            <div class="step-title">Click "Save feedback →"</div>
+            <div class="step-desc">Your feedback is saved instantly to the database. The candidate can retrieve it immediately using their Submission ID. The submission card on the dashboard updates to show <strong>"✓ Feedback given"</strong>. You can edit your feedback at any time by reopening the submission.</div>
+          </div>
+        </div>
+
+        <div class="step step-amber">
+          <div class="step-num">8</div>
+          <div class="step-body">
+            <div class="step-title">Refresh and sign out</div>
+            <div class="step-desc">Click <strong>↻ Refresh</strong> at any time to load new submissions that arrived since you logged in. When finished click <strong>Sign out</strong> to return to the login screen.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- READING RESULTS -->
+    <div class="manual-section" id="results">
+      <div class="section-tag">
+        <div class="section-icon" style="background:rgba(155,127,232,0.1);">📋</div>
+        <span class="section-num">Reference</span>
+      </div>
+      <h2>Reading your results</h2>
+      <div class="section-desc">Here is what every part of your analysis means.</div>
+
+      <div class="result-anatomy">
+
+        <div class="anatomy-row">
+          <div class="anatomy-label">ATS Score</div>
+          <div class="anatomy-desc">A percentage showing how well your CV matches the job description's keywords. <span class="anatomy-tag tag-red">Under 55%</span> — likely filtered before a human read it. <span class="anatomy-tag tag-orange">55–74%</span> — borderline, a recruiter decided. <span class="anatomy-tag tag-green">75%+</span> — strong match, rejection was likely situational.</div>
+        </div>
+
+        <div class="anatomy-row">
+          <div class="anatomy-label">Rejection Stage</div>
+          <div class="anatomy-desc">Where in the hiring process you were most likely stopped. ATS filter means no human saw your CV. Recruiter review means a human screened you out. Hiring manager means you got further but were not selected at final stage.</div>
+        </div>
+
+        <div class="anatomy-row">
+          <div class="anatomy-label">Overall Verdict</div>
+          <div class="anatomy-desc">2–3 sentences summarising the most likely reason for rejection. This is intentionally direct — it is the honest assessment a recruiter would give if they were speaking frankly.</div>
+        </div>
+
+        <div class="anatomy-row">
+          <div class="anatomy-label">Rejection Reasons 1–4</div>
+          <div class="anatomy-desc">The most likely reasons ranked by probability. Reason 1 is the most critical — fix this first. Each reason includes a short explanation of why it caused the rejection.</div>
+        </div>
+
+        <div class="anatomy-row">
+          <div class="anatomy-label">Keywords Missing</div>
+          <div class="anatomy-desc"><span class="anatomy-tag tag-red">Red tags</span> — words and phrases in the job description that do not appear anywhere in your CV. ATS systems scan for these. Add them where genuinely applicable.</div>
+        </div>
+
+        <div class="anatomy-row">
+          <div class="anatomy-label">Present but Weak</div>
+          <div class="anatomy-desc"><span class="anatomy-tag tag-orange">Orange tags</span> — keywords that exist in your CV but are buried, mentioned only once, or not prominent enough to score well in ATS ranking.</div>
+        </div>
+
+        <div class="anatomy-row">
+          <div class="anatomy-label">Keywords You Have</div>
+          <div class="anatomy-desc"><span class="anatomy-tag tag-green">Green tags</span> — keywords from the job description that are already well represented in your CV. These are your strengths for this role.</div>
+        </div>
+
+        <div class="anatomy-row">
+          <div class="anatomy-label">Profile Mismatch</div>
+          <div class="anatomy-desc">Appears only when the fundamental issue is not keywords but a deeper gap — wrong industry background, missing years of experience, or a required qualification you do not have. This is the most important section to read if it appears.</div>
+        </div>
+
+        <div class="anatomy-row">
+          <div class="anatomy-label">What to Fix</div>
+          <div class="anatomy-desc">Five specific, actionable recommendations. These are ranked by impact — start with number one. Each recommendation is tailored to your specific CV and job description, not generic advice.</div>
+        </div>
+
+        <div class="anatomy-row">
+          <div class="anatomy-label">LinkedIn Score</div>
+          <div class="anatomy-desc">Appears only when LinkedIn review is enabled. A separate score for your LinkedIn profile against the same job description. Below the score you will see what is inconsistent between your CV and LinkedIn, gaps on your profile, and LinkedIn-specific strengths.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- FAQ -->
+    <div class="manual-section" id="faq">
+      <div class="section-tag">
+        <div class="section-icon" style="background:rgba(232,135,74,0.1);">❓</div>
+        <span class="section-num">FAQ</span>
+      </div>
+      <h2>Frequently asked questions</h2>
+
+      <div class="faq-list">
+
+        <div class="faq-item">
+          <div class="faq-q">Is my CV stored anywhere?</div>
+          <div class="faq-a">Only if you opt in to HR review. Standard analysis sends your CV to the Claude AI API for processing — it is not stored by this tool after the analysis is complete. If you submit for HR review, the first 600 characters of your CV are stored in our database alongside the AI analysis result.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">How accurate is the AI analysis?</div>
+          <div class="faq-a">It is a well-informed estimate, not a guarantee. The tool analyses keyword matching, profile fit, and common ATS filtering patterns. It cannot know the specific criteria a particular company uses or whether the role was filled internally. Treat it as honest guidance, not a definitive verdict.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">How long does HR feedback take?</div>
+          <div class="faq-a">HR reviewers are professionals who contribute voluntarily. Most submissions receive feedback within 24–48 hours. There is no guaranteed response time. If your submission has been waiting more than 5 days without feedback, contact peter.jankovic@hotmail.sk with your Submission ID.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">I lost my Submission ID. Can I get it back?</div>
+          <div class="faq-a">Unfortunately no — Submission IDs are not linked to any personal account or email address by design, for privacy reasons. If you lose it, submit again for a new analysis. In future, save your ID by emailing it to yourself immediately after receiving it.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Can I request deletion of my submission?</div>
+          <div class="faq-a">Yes. Email peter.jankovic@hotmail.sk with your Submission ID and a deletion request. Your submission will be removed within 30 days in compliance with GDPR.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">How do I become an HR reviewer?</div>
+          <div class="faq-a">Contact peter.jankovic@hotmail.sk with a brief description of your HR or recruitment background. Verified HR professionals, recruiters, and hiring managers are welcome. The access code is shared only with verified reviewers.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Can I use this tool multiple times?</div>
+          <div class="faq-a">Yes — as many times as you like, for as many different job applications as you want. Each analysis is independent. Click "← Analyse another application" after each result to start fresh.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Does the tool work for any industry or role type?</div>
+          <div class="faq-a">Yes. The analysis is based on the content of your specific CV and job description — it is not limited to any industry. It works for tech, finance, NGO, operations, marketing, and any other field as long as you provide a full job description.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="divider"></div>
+    <div style="text-align:center;padding:24px 0;">
+      <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">© 2026 Peter Jankovič — Bratislava, Slovak Republic</div>
+      <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
+        <a href="index.html" style="font-size:13px;color:var(--text-muted);text-decoration:none;">← Back to app</a>
+        <a href="terms.html" style="font-size:13px;color:var(--text-muted);text-decoration:none;">Terms of Service</a>
+        <a href="mailto:peter.jankovic@hotmail.sk" style="font-size:13px;color:var(--text-muted);text-decoration:none;">Contact</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function scrollTo(id) {
+  document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  event.target.closest('.nav-link')?.classList.add('active');
+}
+</script>
+</body>
+</html>
