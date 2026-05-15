@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why Was I Rejected?</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --navy:#0f1923;--navy-mid:#1a2736;--navy-light:#243347;
+  --accent:#e8c547;--accent-dim:#c9a82a;
+  --red:#e85454;--orange:#e8874a;--green:#4aad7a;--blue:#4a8fe8;--purple:#9b7fe8;
+  --text:#f0ece4;--text-muted:#8a9ab0;--text-dim:#5a6878;
+  --border:rgba(255,255,255,0.07);--border-accent:rgba(232,197,71,0.3);
+  --card:rgba(255,255,255,0.04);--card-hover:rgba(255,255,255,0.07);
+  --radius:12px;--radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--navy);color:var(--text);font-family:'Instrument Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;top:-20%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(232,197,71,0.04) 0%,transparent 70%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-10%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(74,143,232,0.04) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.container{max-width:900px;margin:0 auto;padding:0 24px;position:relative;z-index:1;}
+
+/* NAV */
+.mode-nav{display:flex;gap:4px;padding:20px 0 0;}
+.mode-tab{padding:10px 20px;border-radius:var(--radius-sm) var(--radius-sm) 0 0;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);border-bottom:none;background:var(--card);color:var(--text-muted);transition:all 0.2s;}
+.mode-tab:hover{color:var(--text);}
+.mode-tab.active{background:var(--navy-mid);color:var(--text);border-color:var(--border);}
+.mode-tab .tab-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:middle;}
+
+/* PANELS */
+.panel{display:none;background:var(--navy-mid);border:1px solid var(--border);border-radius:0 var(--radius) var(--radius) var(--radius);padding:32px;margin-bottom:48px;animation:fadeIn 0.3s ease;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* HEADER */
+header{padding:40px 0 32px;border-bottom:1px solid var(--border);margin-bottom:32px;}
+.logo-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.logo-mark{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--navy);flex-shrink:0;}
+.logo-text{font-family:'DM Serif Display',serif;font-size:19px;color:var(--text);letter-spacing:-0.02em;}
+h1{font-family:'DM Serif Display',serif;font-size:clamp(28px,4.5vw,48px);line-height:1.1;letter-spacing:-0.03em;margin-bottom:10px;}
+h1 em{font-style:italic;color:var(--accent);}
+.subtitle{font-size:15px;color:var(--text-muted);line-height:1.6;max-width:560px;}
+
+/* FORMS */
+.field-group{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;}
+.field-label{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);}
+.field-label span{color:var(--accent);margin-left:3px;}
+.field-label small{color:var(--text-dim);font-size:10px;font-weight:400;letter-spacing:0.03em;margin-left:6px;text-transform:none;}
+textarea,input[type=text],input[type=password],input[type=email]{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:14px;line-height:1.6;padding:12px 14px;width:100%;outline:none;transition:border-color 0.2s,background 0.2s;}
+textarea::placeholder,input::placeholder{color:var(--text-dim);}
+textarea:focus,input:focus{border-color:var(--border-accent);background:rgba(255,255,255,0.06);}
+textarea{resize:vertical;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:620px){.two-col{grid-template-columns:1fr;}}
+
+/* FILE UPLOAD */
+.upload-area{background:rgba(255,255,255,0.03);border:1px dashed var(--border);border-radius:var(--radius-sm);padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.upload-area:hover{border-color:var(--border-accent);background:rgba(255,255,255,0.05);}
+.upload-area.has-file{border-style:solid;border-color:rgba(74,173,122,0.4);background:rgba(74,173,122,0.05);}
+.upload-icon{font-size:24px;}
+.upload-label{font-size:13px;color:var(--text-muted);}
+.upload-label strong{color:var(--accent);font-weight:500;}
+.upload-sub{font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;}
+.file-name{font-size:12px;color:var(--green);font-family:'DM Mono',monospace;}
+input[type=file]{display:none;}
+.or-divider{display:flex;align-items:center;gap:10px;margin:10px 0 6px;font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;letter-spacing:0.05em;}
+.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* LINKEDIN */
+.linkedin-box{background:rgba(10,102,194,0.08);border:1px solid rgba(10,102,194,0.25);border-radius:var(--radius);padding:20px;margin-bottom:18px;}
+.linkedin-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.li-icon{width:28px;height:28px;background:#0a66c2;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;font-family:'DM Mono',monospace;flex-shrink:0;}
+.linkedin-title{font-size:13px;font-weight:600;color:var(--text);}
+.linkedin-sub{font-size:12px;color:var(--text-muted);margin-top:1px;}
+.li-instructions{font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);border-left:2px solid rgba(10,102,194,0.4);}
+.li-instructions strong{color:var(--text);}
+
+/* BUTTONS */
+.btn-primary{width:100%;padding:16px 32px;background:var(--accent);color:var(--navy);border:none;border-radius:var(--radius-sm);font-family:'Instrument Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:-0.01em;margin-top:4px;}
+.btn-primary:hover{background:var(--accent-dim);transform:translateY(-1px);}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.btn-secondary{padding:10px 20px;background:transparent;border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius-sm);font-family:'Instrument Sans',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;}
+.btn-secondary:hover{border-color:var(--border-accent);color:var(--text);}
+.btn-small{padding:6px 14px;background:transparent;border:1px solid var(--border);color:var(--text-muted);border-radius:6px;font-size:12px;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:all 0.2s;}
+.btn-small:hover{border-color:var(--border-accent);color:var(--text);}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.toggle-label{font-size:13px;color:var(--text-muted);}
+.toggle-switch{position:relative;width:38px;height:21px;flex-shrink:0;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,0.1);border-radius:21px;transition:0.3s;}
+.toggle-slider::before{content:'';position:absolute;width:15px;height:15px;left:3px;bottom:3px;background:var(--text-muted);border-radius:50%;transition:0.3s;}
+.toggle-switch input:checked+.toggle-slider{background:rgba(232,197,71,0.3);}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(17px);background:var(--accent);}
+
+/* LOADING */
+.loading-state{display:none;padding:48px 0;text-align:center;}
+.loading-state.visible{display:block;}
+.loading-dots{display:flex;justify-content:center;gap:8px;margin-bottom:20px;}
+.dot{width:9px;height:9px;background:var(--accent);border-radius:50%;animation:pulse 1.4s ease-in-out infinite;}
+.dot:nth-child(2){animation-delay:0.2s;}
+.dot:nth-child(3){animation-delay:0.4s;}
+@keyframes pulse{0%,80%,100%{opacity:0.2;transform:scale(0.8);}40%{opacity:1;transform:scale(1);}}
+.loading-msg{font-size:13px;color:var(--text-dim);font-family:'DM Mono',monospace;margin:3px 0;transition:all 0.3s;}
+.loading-msg.active{color:var(--text-muted);}
+
+/* RESULTS */
+.results-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.results-title{font-family:'DM Serif Display',serif;font-size:26px;letter-spacing:-0.02em;margin-bottom:3px;}
+.results-sub{font-size:13px;color:var(--text-muted);}
+.score-badges{display:flex;gap:10px;flex-shrink:0;}
+.score-badge{display:flex;flex-direction:column;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 18px;min-width:90px;}
+.score-num{font-family:'DM Mono',monospace;font-size:30px;font-weight:500;line-height:1;margin-bottom:3px;}
+.score-label{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
+
+.verdict-card{border-radius:var(--radius-sm);padding:16px 20px;margin-bottom:18px;border-left:3px solid;}
+.verdict-card.critical{background:rgba(232,84,84,0.07);border-color:var(--red);}
+.verdict-card.moderate{background:rgba(232,135,74,0.07);border-color:var(--orange);}
+.verdict-card.good{background:rgba(74,173,122,0.07);border-color:var(--green);}
+.verdict-tag{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;}
+.verdict-card.critical .verdict-tag{color:var(--red);}
+.verdict-card.moderate .verdict-tag{color:var(--orange);}
+.verdict-card.good .verdict-tag{color:var(--green);}
+.verdict-text{font-size:14px;line-height:1.65;color:var(--text);}
+
+.analysis-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:14px;}
+.card-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.card-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.card-header-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
+.card-body{padding:18px;}
+
+.tag-cloud{display:flex;flex-wrap:wrap;gap:7px;}
+.tag{font-family:'DM Mono',monospace;font-size:12px;padding:3px 9px;border-radius:5px;border:1px solid;}
+.tag-missing{background:rgba(232,84,84,0.1);border-color:rgba(232,84,84,0.3);color:#f09090;}
+.tag-weak{background:rgba(232,135,74,0.1);border-color:rgba(232,135,74,0.3);color:#f0a87a;}
+.tag-present{background:rgba(74,173,122,0.1);border-color:rgba(74,173,122,0.3);color:#7acca0;}
+
+.reason-list{display:flex;flex-direction:column;gap:11px;}
+.reason-item{display:flex;gap:12px;align-items:flex-start;}
+.reason-rank{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.rank-1{background:rgba(232,84,84,0.15);color:var(--red);}
+.rank-2{background:rgba(232,135,74,0.15);color:var(--orange);}
+.rank-3{background:rgba(232,197,71,0.15);color:var(--accent);}
+.rank-4,.rank-5{background:rgba(255,255,255,0.06);color:var(--text-muted);}
+.reason-text{font-size:14px;line-height:1.6;color:var(--text);flex:1;}
+.reason-text strong{font-weight:600;display:block;margin-bottom:1px;}
+.reason-text span{color:var(--text-muted);font-size:13px;}
+
+.rec-list{display:flex;flex-direction:column;gap:9px;}
+.rec-item{display:flex;gap:9px;align-items:flex-start;font-size:14px;line-height:1.6;color:var(--text-muted);}
+.rec-item::before{content:'→';color:var(--accent);flex-shrink:0;font-family:'DM Mono',monospace;font-size:12px;margin-top:3px;}
+
+/* HR DASHBOARD */
+.hr-login{max-width:420px;margin:0 auto;padding:20px 0;}
+.hr-login-title{font-family:'DM Serif Display',serif;font-size:24px;letter-spacing:-0.02em;margin-bottom:6px;}
+.hr-login-sub{font-size:14px;color:var(--text-muted);margin-bottom:28px;line-height:1.5;}
+.passcode-hint{font-size:12px;color:var(--text-dim);margin-top:10px;font-family:'DM Mono',monospace;}
+
+.hr-dashboard-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px;}
+.hr-dashboard-title{font-family:'DM Serif Display',serif;font-size:22px;letter-spacing:-0.02em;}
+.hr-stats{display:flex;gap:16px;}
+.hr-stat{font-size:12px;color:var(--text-muted);font-family:'DM Mono',monospace;}
+.hr-stat strong{color:var(--accent);}
+
+.submission-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:12px;transition:border-color 0.2s;}
+.submission-card:hover{border-color:rgba(255,255,255,0.14);}
+.sub-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;}
+.sub-meta{flex:1;}
+.sub-role{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.sub-date{font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;}
+.sub-score{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;}
+.sub-excerpt{font-size:13px;color:var(--text-muted);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.sub-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.sub-feedback-badge{font-size:11px;padding:3px 8px;border-radius:4px;font-family:'DM Mono',monospace;}
+.has-feedback{background:rgba(74,173,122,0.1);color:var(--green);border:1px solid rgba(74,173,122,0.25);}
+.no-feedback{background:rgba(255,255,255,0.04);color:var(--text-dim);border:1px solid var(--border);}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,20,30,0.88);z-index:100;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--navy-mid);border:1px solid var(--border);border-radius:var(--radius);max-width:660px;width:100%;max-height:88vh;overflow-y:auto;padding:28px;}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;letter-spacing:-0.02em;margin-bottom:3px;}
+.modal-sub{font-size:13px;color:var(--text-muted);margin-bottom:20px;}
+.modal-section{margin-bottom:14px;}
+.modal-section-label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px;}
+.modal-text{font-size:13px;color:var(--text-muted);line-height:1.6;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);padding:12px;border:1px solid var(--border);max-height:110px;overflow-y:auto;white-space:pre-wrap;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);}
+.existing-feedback{background:rgba(74,173,122,0.06);border:1px solid rgba(74,173,122,0.2);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;}
+.existing-feedback-label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--green);margin-bottom:6px;}
+.existing-feedback-text{font-size:13px;color:var(--text);line-height:1.6;}
+
+/* MISC */
+.error-box{display:none;background:rgba(232,84,84,0.07);border:1px solid rgba(232,84,84,0.25);border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:#f09090;margin-bottom:14px;line-height:1.5;}
+.error-box.visible{display:block;}
+.disclaimer{font-size:12px;color:var(--text-dim);text-align:center;line-height:1.5;margin-top:10px;}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text-muted);}
+.empty-state .es-icon{font-size:36px;margin-bottom:12px;}
+.empty-state p{font-size:14px;line-height:1.6;}
+.id-display{font-family:'DM Mono',monospace;font-size:20px;color:var(--accent);margin:10px 0 6px;letter-spacing:0.05em;}
+.li-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:560px){.li-compare-grid{grid-template-columns:1fr;}}
+.li-compare-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;}
+.li-compare-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo-row">
+      <div class="logo-mark">?</div>
+      <span class="logo-text">Why Was I Rejected?</span>
+    </div>
+    <h1>The honest answer<br>you didn't get. <em>Yet.</em></h1>
+    <p class="subtitle">AI-powered rejection analysis. LinkedIn profile review. Real feedback from HR professionals.</p>
+  </header>
+
+  <div class="mode-nav">
+    <div class="mode-tab active" onclick="switchTab('candidate')" id="tab-candidate"><span class="tab-dot" style="background:#4a8fe8;"></span>Candidate</div>
+    <div class="mode-tab" onclick="switchTab('feedback')" id="tab-feedback"><span class="tab-dot" style="background:#4aad7a;"></span>Check HR Feedback</div>
+    <div class="mode-tab" onclick="switchTab('hr')" id="tab-hr"><span class="tab-dot" style="background:#e8c547;"></span>HR Reviewer</div>
+  </div>
+
+  <!-- ═══ CANDIDATE ═══ -->
+  <div class="panel active" id="panel-candidate">
+    <div id="candidate-form">
+      <div class="two-col">
+        <div>
+          <div class="field-group">
+            <div class="field-label">Your CV <span>*</span></div>
+            <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+              <div class="upload-icon">📄</div>
+              <div class="upload-label"><strong>Upload CV</strong></div>
+              <div class="upload-sub">PDF, DOCX or TXT</div>
+              <div class="file-name" id="file-name-display" style="display:none;"></div>
+            </div>
+            <input type="file" id="file-input" accept=".pdf,.doc,.docx,.txt">
+            <div class="or-divider">or paste text</div>
+            <textarea id="cv-text" placeholder="Paste your CV here..." rows="7"></textarea>
+          </div>
+        </div>
+        <div>
+          <div class="field-group">
+            <div class="field-label">Job Description <span>*</span></div>
+            <textarea id="jd-text" placeholder="Paste the full job description..." style="min-height:280px;"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- LinkedIn toggle -->
+      <div class="toggle-row">
+        <label class="toggle-switch"><input type="checkbox" id="li-toggle" onchange="toggleLinkedIn()"><span class="toggle-slider"></span></label>
+        <span class="toggle-label">Also review my LinkedIn profile</span>
+      </div>
+      <div id="linkedin-section" style="display:none;">
+        <div class="linkedin-box">
+          <div class="linkedin-header">
+            <div class="li-icon">in</div>
+            <div><div class="linkedin-title">LinkedIn Profile Review</div><div class="linkedin-sub">Compare your CV against your LinkedIn presence</div></div>
+          </div>
+          <div class="li-instructions"><strong>How to copy your LinkedIn content:</strong> Go to your LinkedIn profile → click "More" → "Save to PDF" and paste the text below. Or manually copy your About section and each experience entry.</div>
+          <div class="field-group">
+            <div class="field-label">LinkedIn URL <small>optional</small></div>
+            <input type="text" id="li-url" placeholder="https://linkedin.com/in/yourname">
+          </div>
+          <div class="field-group">
+            <div class="field-label">LinkedIn Profile Text <span>*</span></div>
+            <textarea id="li-text" placeholder="Paste your LinkedIn About section, headline, and experience..." rows="6"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- HR submit toggle -->
+      <div class="toggle-row">
+        <label class="toggle-switch"><input type="checkbox" id="hr-toggle" onchange="toggleHRSubmit()"><span class="toggle-slider"></span></label>
+        <span class="toggle-label">Submit for HR professional feedback</span>
+      </div>
+      <div id="hr-submit-fields" style="display:none;margin-bottom:16px;">
+        <div class="field-group">
+          <div class="field-label">Your name or alias <small>shown to HR reviewer</small></div>
+          <input type="text" id="candidate-name" placeholder="e.g. Peter J. or Anonymous">
+        </div>
+        <div style="font-size:12px;color:var(--text-dim);line-height:1.6;margin-top:-8px;">Your submission is stored anonymously. You'll receive a unique ID to check for feedback later.</div>
+      </div>
+
+      <div class="error-box" id="candidate-error"></div>
+      <button class="btn-primary" id="analyse-btn" onclick="runAnalysis()">Analyse my application →</button>
+      <p class="disclaimer">Sent to Claude AI for analysis. HR submissions stored in Supabase. Nothing else is retained.</p>
+    </div>
+
+    <div class="loading-state" id="candidate-loading">
+      <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <div id="loading-msgs"></div>
+    </div>
+
+    <div id="candidate-results" style="display:none;"></div>
+  </div>
+
+  <!-- ═══ CHECK FEEDBACK ═══ -->
+  <div class="panel" id="panel-feedback">
+    <div style="max-width:480px;">
+      <div style="font-family:'DM Serif Display',serif;font-size:22px;letter-spacing:-0.02em;margin-bottom:6px;">Check HR Feedback</div>
+      <div style="font-size:14px;color:var(--text-muted);margin-bottom:24px;line-height:1.5;">Enter your submission ID to see if an HR reviewer has responded.</div>
+      <div class="field-group">
+        <div class="field-label">Submission ID</div>
+        <input type="text" id="feedback-check-id" placeholder="e.g. sub_1a2b3c4d" style="font-family:'DM Mono',monospace;font-size:13px;" onkeydown="if(event.key==='Enter')checkFeedback()">
+      </div>
+      <div class="error-box" id="feedback-error"></div>
+      <button class="btn-primary" onclick="checkFeedback()">Check for feedback →</button>
+      <div id="feedback-result-area" style="margin-top:20px;"></div>
+    </div>
+  </div>
+
+  <!-- ═══ HR REVIEWER ═══ -->
+  <div class="panel" id="panel-hr">
+    <div id="hr-login-form" class="hr-login">
+      <div class="hr-login-title">HR Reviewer Portal</div>
+      <div class="hr-login-sub">Access the candidate submission dashboard. Review CVs, job descriptions, and AI analysis — then add your professional perspective.</div>
+      <div class="field-group">
+        <div class="field-label">Your Name</div>
+        <input type="text" id="hr-name" placeholder="e.g. Sarah — Senior Recruiter">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Access Code</div>
+        <input type="password" id="hr-passcode" placeholder="Enter access code" onkeydown="if(event.key==='Enter')hrLogin()">
+      </div>
+      <div class="error-box" id="hr-error"></div>
+      <button class="btn-primary" onclick="hrLogin()">Enter dashboard →</button>
+      <p class="passcode-hint">Access code: <strong>HR2024</strong></p>
+    </div>
+
+    <div id="hr-dashboard" style="display:none;">
+      <div class="hr-dashboard-header">
+        <div>
+          <div class="hr-dashboard-title">Submission Dashboard</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:2px;">Logged in as <span id="hr-reviewer-name" style="color:var(--accent);"></span></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <div class="hr-stats">
+            <div class="hr-stat">Total: <strong id="stat-total">0</strong></div>
+            <div class="hr-stat">Reviewed: <strong id="stat-reviewed">0</strong></div>
+          </div>
+          <button class="btn-small" onclick="loadSubmissions()">↻ Refresh</button>
+          <button class="btn-small" onclick="hrLogout()">Sign out</button>
+        </div>
+      </div>
+      <div id="submissions-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+/* ── SUPABASE INIT ── */
+const SUPABASE_URL = 'https://qihtadkrxbvsimjweyim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFpaHRhZGtyeGJ2c2ltandleWltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4Mzg4NTcsImV4cCI6MjA5NDQxNDg1N30.LtAcLvAEGWTwV-vk8AJZunrcqZZ5Mj1rD8gvqH2ianE';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const HR_PASSCODE = 'HR2024';
+let uploadedFileText = '';
+let currentHRReviewer = '';
+
+/* ── TABS ── */
+function switchTab(tab) {
+  ['candidate','feedback','hr'].forEach(t => {
+    document.getElementById('panel-'+t).classList.remove('active');
+    document.getElementById('tab-'+t).classList.remove('active');
+  });
+  document.getElementById('panel-'+tab).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab === 'hr' && currentHRReviewer) loadSubmissions();
+}
+
+/* ── TOGGLES ── */
+function toggleLinkedIn() {
+  document.getElementById('linkedin-section').style.display =
+    document.getElementById('li-toggle').checked ? 'block' : 'none';
+}
+function toggleHRSubmit() {
+  document.getElementById('hr-submit-fields').style.display =
+    document.getElementById('hr-toggle').checked ? 'block' : 'none';
+}
+
+/* ── FILE UPLOAD ── */
+document.getElementById('file-input').addEventListener('change', async function(e) {
+  const file = e.target.files[0]; if (!file) return;
+  document.getElementById('file-name-display').textContent = file.name;
+  document.getElementById('file-name-display').style.display = 'block';
+  document.getElementById('upload-area').classList.add('has-file');
+  try { uploadedFileText = await file.text(); } catch(e) { uploadedFileText = `[File: ${file.name}]`; }
+});
+
+/* ── HELPERS ── */
+function showError(id, msg) { const el=document.getElementById(id); el.textContent=msg; el.classList.add('visible'); }
+function hideError(id) { document.getElementById(id).classList.remove('visible'); }
+function scoreColor(s) { return s>=80?'#4aad7a':s>=60?'#e8874a':'#e85454'; }
+function scoreLabel(s) { return s>=85?'Strong match':s>=70?'Reasonable match':s>=55?'Borderline':s>=40?'Weak match':'Profile mismatch'; }
+function genId() { return 'sub_'+Math.random().toString(36).slice(2,10); }
+function fmtDate(ts) { return new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+
+/* ── LOADING ── */
+const loadingMsgs = {
+  cv:['Reading your CV...','Scanning job requirements...','Matching against ATS filters...','Assessing profile fit...','Writing your honest feedback...'],
+  li:['Reading your CV...','Analysing LinkedIn profile...','Comparing CV vs LinkedIn...','Checking keyword gaps...','Preparing combined verdict...']
+};
+function startLoading(type) {
+  const msgs = loadingMsgs[type]||loadingMsgs.cv;
+  document.getElementById('loading-msgs').innerHTML = msgs.map((m,i)=>`<div class="loading-msg" id="lm${i}">${m}</div>`).join('');
+  let i=0;
+  return setInterval(()=>{
+    if(i>0) document.getElementById(`lm${i-1}`)?.classList.remove('active');
+    if(i<msgs.length){document.getElementById(`lm${i}`)?.classList.add('active');i++;}
+  },1100);
+}
+
+/* ══ MAIN ANALYSIS ══ */
+async function runAnalysis() {
+  hideError('candidate-error');
+  const cvText = document.getElementById('cv-text').value.trim()||uploadedFileText.trim();
+  const jdText = document.getElementById('jd-text').value.trim();
+  const liOn = document.getElementById('li-toggle').checked;
+  const liText = liOn ? document.getElementById('li-text').value.trim() : '';
+  const hrOn = document.getElementById('hr-toggle').checked;
+  const candidateName = document.getElementById('candidate-name').value.trim()||'Anonymous';
+
+  if (!cvText) { showError('candidate-error','Please paste your CV or upload a file.'); return; }
+  if (!jdText||jdText.length<80) { showError('candidate-error','Please paste the full job description.'); return; }
+  if (liOn&&!liText) { showError('candidate-error','Please paste your LinkedIn profile text, or turn off the LinkedIn toggle.'); return; }
+
+  document.getElementById('candidate-form').style.display='none';
+  document.getElementById('candidate-loading').classList.add('visible');
+  const timer = startLoading(liOn?'li':'cv');
+
+  const prompt=`You are a brutally honest senior recruiter with 20+ years experience. A candidate was rejected and wants to know exactly why.
+
+Analyse their CV against the job description. Return ONLY valid JSON — no markdown, no preamble:
+
+{
+  "ats_score": <0-100>,
+  "rejection_stage": "<'likely filtered by ATS'|'screened out at recruiter review'|'rejected at hiring manager review'|'strong match — rejection likely situational'>",
+  "overall_verdict": "<2-3 brutally honest sentences>",
+  "rejection_reasons": [
+    {"title":"<short>","detail":"<1-2 sentences>"},
+    {"title":"<short>","detail":"<1-2 sentences>"},
+    {"title":"<short>","detail":"<1-2 sentences>"},
+    {"title":"<short>","detail":"<1-2 sentences>"}
+  ],
+  "keywords_missing": ["<kw>",...],
+  "keywords_weak": ["<kw>",...],
+  "keywords_present": ["<kw>",...],
+  "profile_mismatch": "<2-3 sentences if mismatch, else null>",
+  "recommendations": ["<fix1>","<fix2>","<fix3>","<fix4>","<fix5>"]
+  ${liOn?`,"linkedin_score":<0-100>,"linkedin_vs_cv":"<2-3 sentences on CV vs LinkedIn consistency>","linkedin_gaps":["<gap>",...],"linkedin_strengths":["<strength>",...]`:''}
+}
+
+CV:
+${cvText.slice(0,4000)}
+
+JOB DESCRIPTION:
+${jdText.slice(0,3000)}
+${liOn?`\nLINKEDIN:\n${liText.slice(0,2000)}`:''}`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    });
+    clearInterval(timer);
+    if(!resp.ok) throw new Error(`API ${resp.status}`);
+    const apiData = await resp.json();
+    const raw = apiData.content.map(b=>b.text||'').join('').trim().replace(/```json|```/g,'').trim();
+    const data = JSON.parse(raw);
+
+    // Save to Supabase if HR requested
+    let submissionId = null;
+    if (hrOn) {
+      submissionId = genId();
+      const { error } = await sb.from('submissions').insert({
+        id: submissionId,
+        candidate_name: candidateName,
+        cv_excerpt: cvText.slice(0,600),
+        jd_excerpt: jdText.slice(0,400),
+        ai_analysis: data
+      });
+      if (error) console.warn('Supabase insert error:', error.message);
+    }
+
+    document.getElementById('candidate-loading').classList.remove('visible');
+    renderResults(data, submissionId, liOn);
+
+  } catch(err) {
+    clearInterval(timer);
+    document.getElementById('candidate-loading').classList.remove('visible');
+    document.getElementById('candidate-form').style.display='block';
+    showError('candidate-error',`Something went wrong: ${err.message}. Please try again.`);
+  }
+}
+
+/* ── RENDER RESULTS ── */
+function renderResults(data, submissionId, liOn) {
+  const score = data.ats_score||0;
+  const color = scoreColor(score);
+  const vClass = score>=75?'good':score>=55?'moderate':'critical';
+  const vTag = score>=75?'Likely passed ATS':score>=55?'Borderline — human review decided it':'Likely filtered before human review';
+
+  const kMiss=(data.keywords_missing||[]).map(k=>`<span class="tag tag-missing">${k}</span>`).join('');
+  const kWeak=(data.keywords_weak||[]).map(k=>`<span class="tag tag-weak">${k}</span>`).join('');
+  const kPres=(data.keywords_present||[]).map(k=>`<span class="tag tag-present">${k}</span>`).join('');
+  const reasons=(data.rejection_reasons||[]).map((r,i)=>`<div class="reason-item"><div class="reason-rank rank-${i+1}">${i+1}</div><div class="reason-text"><strong>${r.title}</strong><span>${r.detail}</span></div></div>`).join('');
+  const recs=(data.recommendations||[]).map(r=>`<div class="rec-item">${r}</div>`).join('');
+
+  let liSection='';
+  if(liOn&&data.linkedin_score!==undefined){
+    const lc=scoreColor(data.linkedin_score);
+    const lGaps=(data.linkedin_gaps||[]).map(g=>`<span class="tag tag-missing">${g}</span>`).join('');
+    const lStr=(data.linkedin_strengths||[]).map(s=>`<span class="tag tag-present">${s}</span>`).join('');
+    liSection=`<div class="analysis-card"><div class="card-header"><div class="card-dot" style="background:#0a66c2;"></div><div class="card-header-title">LinkedIn Profile Analysis</div></div><div class="card-body"><div class="li-compare-grid"><div class="li-compare-card"><div class="li-compare-title">LinkedIn score</div><div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:${lc};margin-bottom:8px;">${data.linkedin_score}%</div><div style="font-size:13px;color:var(--text-muted);line-height:1.5;">${data.linkedin_vs_cv||''}</div></div><div class="li-compare-card"><div class="li-compare-title">Gaps on LinkedIn</div><div class="tag-cloud">${lGaps||'<span style="font-size:13px;color:var(--text-dim);">None detected</span>'}</div>${lStr?`<div class="li-compare-title" style="margin-top:12px;">Strengths</div><div class="tag-cloud">${lStr}</div>`:''}</div></div></div></div>`;
+  }
+
+  let subBanner='';
+  if(submissionId){
+    subBanner=`<div class="verdict-card" style="background:rgba(74,173,122,0.06);border-color:var(--green);"><div class="verdict-tag" style="color:var(--green);">Submitted for HR review ✓</div><div class="verdict-text">Your application is in the HR reviewer queue. Save your submission ID:</div><div class="id-display">${submissionId}</div><div style="font-size:12px;color:var(--text-muted);">Go to "Check HR Feedback" tab and enter this ID to retrieve feedback once a reviewer responds.</div></div>`;
+  }
+
+  document.getElementById('candidate-results').innerHTML=`
+    <div class="results-header">
+      <div><div class="results-title">Here's the honest verdict.</div><div class="results-sub">${scoreLabel(score)} — ${data.rejection_stage||'screened at recruiter review'}</div></div>
+      <div class="score-badges">
+        <div class="score-badge"><div class="score-num" style="color:${color}">${score}%</div><div class="score-label">ATS match</div></div>
+        ${liOn&&data.linkedin_score!==undefined?`<div class="score-badge"><div class="score-num" style="color:${scoreColor(data.linkedin_score)}">${data.linkedin_score}%</div><div class="score-label">LinkedIn</div></div>`:''}
+      </div>
+    </div>
+    ${subBanner}
+    <div class="verdict-card ${vClass}"><div class="verdict-tag">${vTag}</div><div class="verdict-text">${data.overall_verdict}</div></div>
+    <div class="analysis-card"><div class="card-header"><div class="card-dot" style="background:var(--red);"></div><div class="card-header-title">Most likely rejection reasons</div></div><div class="card-body"><div class="reason-list">${reasons}</div></div></div>
+    ${kMiss?`<div class="analysis-card"><div class="card-header"><div class="card-dot" style="background:var(--red);"></div><div class="card-header-title">Keywords missing</div></div><div class="card-body"><div class="tag-cloud">${kMiss}</div></div></div>`:''}
+    ${kWeak?`<div class="analysis-card"><div class="card-header"><div class="card-dot" style="background:var(--orange);"></div><div class="card-header-title">Present but too weak</div></div><div class="card-body"><div class="tag-cloud">${kWeak}</div></div></div>`:''}
+    ${kPres?`<div class="analysis-card"><div class="card-header"><div class="card-dot" style="background:var(--green);"></div><div class="card-header-title">Keywords you have</div></div><div class="card-body"><div class="tag-cloud">${kPres}</div></div></div>`:''}
+    ${data.profile_mismatch?`<div class="analysis-card"><div class="card-header"><div class="card-dot" style="background:var(--orange);"></div><div class="card-header-title">Profile mismatch</div></div><div class="card-body"><div class="verdict-text" style="font-size:14px;color:var(--text-muted);">${data.profile_mismatch}</div></div></div>`:''}
+    ${liSection}
+    <div class="analysis-card"><div class="card-header"><div class="card-dot" style="background:var(--blue);"></div><div class="card-header-title">What to fix before applying again</div></div><div class="card-body"><div class="rec-list">${recs}</div></div></div>
+    <button class="btn-secondary" onclick="resetCandidate()" style="margin-top:24px;margin-bottom:40px;">← Analyse another application</button>
+  `;
+  document.getElementById('candidate-results').style.display='block';
+}
+
+function resetCandidate(){
+  document.getElementById('candidate-results').style.display='none';
+  document.getElementById('candidate-results').innerHTML='';
+  document.getElementById('candidate-form').style.display='block';
+  ['cv-text','jd-text','li-text','li-url','candidate-name'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('li-toggle').checked=false;
+  document.getElementById('hr-toggle').checked=false;
+  document.getElementById('hr-submit-fields').style.display='none';
+  document.getElementById('linkedin-section').style.display='none';
+  document.getElementById('file-name-display').style.display='none';
+  document.getElementById('upload-area').classList.remove('has-file');
+  uploadedFileText='';
+  hideError('candidate-error');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══ CHECK FEEDBACK ══ */
+async function checkFeedback(){
+  hideError('feedback-error');
+  const id = document.getElementById('feedback-check-id').value.trim();
+  if(!id){showError('feedback-error','Please enter your submission ID.');return;}
+  const area = document.getElementById('feedback-result-area');
+  area.innerHTML='<div style="color:var(--text-dim);font-size:13px;padding:12px 0;">Checking...</div>';
+
+  const {data,error} = await sb.from('submissions').select('*').eq('id',id).single();
+  if(error||!data){
+    area.innerHTML='';
+    showError('feedback-error','No submission found with that ID. Please check and try again.');
+    return;
+  }
+
+  if(data.hr_feedback){
+    area.innerHTML=`<div style="background:rgba(74,173,122,0.06);border:1px solid rgba(74,173,122,0.2);border-radius:var(--radius);padding:20px;margin-top:4px;"><div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--green);margin-bottom:8px;">HR Feedback received</div><div style="font-size:14px;color:var(--text);line-height:1.7;">${data.hr_feedback}</div><div style="font-size:12px;color:var(--text-muted);margin-top:12px;font-family:'DM Mono',monospace;">From: ${data.hr_reviewer||'HR Reviewer'} · ${fmtDate(data.hr_timestamp)}</div></div>`;
+  } else {
+    area.innerHTML=`<div class="verdict-card moderate"><div class="verdict-tag">Pending review</div><div class="verdict-text">Your submission <span style="font-family:'DM Mono',monospace;">${id}</span> is in the queue. No HR feedback yet — check back soon.</div></div>`;
+  }
+}
+
+/* ══ HR LOGIN ══ */
+function hrLogin(){
+  hideError('hr-error');
+  const name = document.getElementById('hr-name').value.trim();
+  const pass = document.getElementById('hr-passcode').value.trim();
+  if(!name){showError('hr-error','Please enter your name.');return;}
+  if(pass!==HR_PASSCODE){showError('hr-error','Incorrect access code.');return;}
+  currentHRReviewer=name;
+  document.getElementById('hr-login-form').style.display='none';
+  document.getElementById('hr-dashboard').style.display='block';
+  document.getElementById('hr-reviewer-name').textContent=name;
+  loadSubmissions();
+}
+
+function hrLogout(){
+  currentHRReviewer='';
+  document.getElementById('hr-dashboard').style.display='none';
+  document.getElementById('hr-login-form').style.display='block';
+  ['hr-name','hr-passcode'].forEach(id=>document.getElementById(id).value='');
+}
+
+/* ══ LOAD SUBMISSIONS ══ */
+async function loadSubmissions(){
+  const list = document.getElementById('submissions-list');
+  list.innerHTML='<div style="color:var(--text-dim);font-size:13px;padding:20px 0;">Loading submissions...</div>';
+
+  const {data,error} = await sb.from('submissions').select('*').order('created_at',{ascending:false}).limit(100);
+  if(error){list.innerHTML=`<div class="error-box visible">Could not load: ${error.message}</div>`;return;}
+  if(!data||!data.length){
+    list.innerHTML=`<div class="empty-state"><div class="es-icon">📭</div><p>No submissions yet. Candidates can submit from the Candidate tab.</p></div>`;
+    document.getElementById('stat-total').textContent='0';
+    document.getElementById('stat-reviewed').textContent='0';
+    return;
+  }
+
+  document.getElementById('stat-total').textContent=data.length;
+  document.getElementById('stat-reviewed').textContent=data.filter(s=>s.hr_feedback).length;
+
+  list.innerHTML=data.map(sub=>{
+    const score=(sub.ai_analysis?.ats_score)||0;
+    const color=scoreColor(score);
+    return `<div class="submission-card">
+      <div class="sub-header">
+        <div class="sub-meta"><div class="sub-role">${sub.candidate_name||'Anonymous'}</div><div class="sub-date">${fmtDate(sub.created_at)} · <span style="font-family:'DM Mono',monospace;">${sub.id}</span></div></div>
+        <div class="sub-score" style="color:${color}">${score}%</div>
+      </div>
+      <div class="sub-excerpt">${sub.ai_analysis?.overall_verdict||sub.jd_excerpt||''}</div>
+      <div class="sub-actions">
+        <button class="btn-small" onclick="openModal('${sub.id}')">Review & give feedback</button>
+        <span class="sub-feedback-badge ${sub.hr_feedback?'has-feedback':'no-feedback'}">${sub.hr_feedback?'✓ Feedback given':'Awaiting feedback'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══ MODAL ══ */
+async function openModal(id){
+  const {data:sub,error}=await sb.from('submissions').select('*').eq('id',id).single();
+  if(error||!sub)return;
+  const d=sub.ai_analysis||{};
+  document.getElementById('modal-content').innerHTML=`
+    <div class="modal-title">${sub.candidate_name||'Anonymous'}</div>
+    <div class="modal-sub">Submitted ${fmtDate(sub.created_at)} · <span style="font-family:'DM Mono',monospace;">${sub.id}</span> · ATS: ${d.ats_score||0}%</div>
+    <div class="modal-section"><div class="modal-section-label">AI Verdict</div><div class="modal-text">${d.overall_verdict||'—'}</div></div>
+    <div class="modal-section"><div class="modal-section-label">Top Rejection Reasons</div><div class="modal-text">${(d.rejection_reasons||[]).map((r,i)=>`${i+1}. ${r.title}: ${r.detail}`).join('\n\n')||'—'}</div></div>
+    <div class="modal-section"><div class="modal-section-label">CV Excerpt</div><div class="modal-text">${sub.cv_excerpt||'—'}</div></div>
+    <div class="modal-section"><div class="modal-section-label">JD Excerpt</div><div class="modal-text">${sub.jd_excerpt||'—'}</div></div>
+    ${sub.hr_feedback?`<div class="existing-feedback"><div class="existing-feedback-label">Your previous feedback</div><div class="existing-feedback-text">${sub.hr_feedback}</div></div>`:''}
+    <div class="modal-section"><div class="modal-section-label">Your HR Feedback <span style="color:var(--accent);">*</span></div><textarea id="modal-feedback-text" rows="5" placeholder="Share your honest professional perspective on why this candidate may have been rejected and what they should improve...">${sub.hr_feedback||''}</textarea></div>
+    <div class="error-box" id="modal-error"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" style="width:auto;padding:10px 24px;" onclick="saveFeedback('${id}')">Save feedback →</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+async function saveFeedback(id){
+  hideError('modal-error');
+  const text=document.getElementById('modal-feedback-text').value.trim();
+  if(!text||text.length<20){showError('modal-error','Please write at least a sentence of feedback.');return;}
+  const {error}=await sb.from('submissions').update({
+    hr_feedback:text,
+    hr_reviewer:currentHRReviewer,
+    hr_timestamp:new Date().toISOString()
+  }).eq('id',id);
+  if(error){showError('modal-error',`Could not save: ${error.message}`);return;}
+  closeModal();
+  loadSubmissions();
+}
+
+function closeModal(e){
+  if(!e||e.target===document.getElementById('modal-overlay')){
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+</script>
+</body>
+</html>
