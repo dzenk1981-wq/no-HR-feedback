@@ -470,7 +470,29 @@ function startLoading(type) {
 }
 
 /* ══ MAIN ANALYSIS ══ */
-async function runAnalysis() {
+function buildPrompt(cvText, jdText, liOn, liText) {
+    var base = "You are a brutally honest senior recruiter with 20+ years experience. A candidate was rejected and wants to know exactly why.\n\n";
+    base += "Analyse their CV against the job description. Return ONLY valid JSON, no markdown, no preamble:\n\n";
+    base += "{\n";
+    base += "  \"ats_score\": 0,\n";
+    base += "  \"rejection_stage\": \"likely filtered by ATS\",\n";
+    base += "  \"overall_verdict\": \"your verdict here\",\n";
+    base += "  \"rejection_reasons\": [{\"title\":\"reason\",\"detail\":\"detail\"},{\"title\":\"reason\",\"detail\":\"detail\"},{\"title\":\"reason\",\"detail\":\"detail\"},{\"title\":\"reason\",\"detail\":\"detail\"}],\n";
+    base += "  \"keywords_missing\": [],\n";
+    base += "  \"keywords_weak\": [],\n";
+    base += "  \"keywords_present\": [],\n";
+    base += "  \"profile_mismatch\": null,\n";
+    base += "  \"recommendations\": [\"fix1\",\"fix2\",\"fix3\",\"fix4\",\"fix5\"]";
+    if (liOn) {
+      base += ",\n  \"linkedin_score\": 0,\n  \"linkedin_vs_cv\": \"comparison\",\n  \"linkedin_gaps\": [],\n  \"linkedin_strengths\": []";
+    }
+    base += "\n}\n\n";
+    base += "CV:\n" + cvText.slice(0, 4000) + "\n\nJOB DESCRIPTION:\n" + jdText.slice(0, 3000);
+    if (liOn) { base += "\n\nLINKEDIN:\n" + liText.slice(0, 2000); }
+    return base;
+  }
+
+  async function runAnalysis() {
   hideError('candidate-error');
   const cvText = document.getElementById('cv-text').value.trim()||uploadedFileText.trim();
   const jdText = document.getElementById('jd-text').value.trim();
@@ -487,34 +509,7 @@ async function runAnalysis() {
   document.getElementById('candidate-loading').classList.add('visible');
   const timer = startLoading(liOn?'li':'cv');
 
-  const prompt=`You are a brutally honest senior recruiter with 20+ years experience. A candidate was rejected and wants to know exactly why.
-
-Analyse their CV against the job description. Return ONLY valid JSON — no markdown, no preamble:
-
-{
-  "ats_score": <0-100>,
-  "rejection_stage": "<'likely filtered by ATS'|'screened out at recruiter review'|'rejected at hiring manager review'|'strong match — rejection likely situational'>",
-  "overall_verdict": "<2-3 brutally honest sentences>",
-  "rejection_reasons": [
-    {"title":"<short>","detail":"<1-2 sentences>"},
-    {"title":"<short>","detail":"<1-2 sentences>"},
-    {"title":"<short>","detail":"<1-2 sentences>"},
-    {"title":"<short>","detail":"<1-2 sentences>"}
-  ],
-  "keywords_missing": ["<kw>",...],
-  "keywords_weak": ["<kw>",...],
-  "keywords_present": ["<kw>",...],
-  "profile_mismatch": "<2-3 sentences if mismatch, else null>",
-  "recommendations": ["<fix1>","<fix2>","<fix3>","<fix4>","<fix5>"]
-  ${liOn?`,"linkedin_score":<0-100>,"linkedin_vs_cv":"<2-3 sentences on CV vs LinkedIn consistency>","linkedin_gaps":["<gap>",...],"linkedin_strengths":["<strength>",...]`:''}
-}
-
-CV:
-${cvText.slice(0,4000)}
-
-JOB DESCRIPTION:
-${jdText.slice(0,3000)}
-${liOn?`\nLINKEDIN:\n${liText.slice(0,2000)}`:''}`;
+  const prompt = buildPrompt(cvText, jdText, liOn, liText);
 
   try {
     const resp = await fetch('https://rejection-proxy.dzenk1981.workers.dev/',{
