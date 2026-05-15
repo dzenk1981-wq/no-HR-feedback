@@ -496,7 +496,7 @@ ${jdText.slice(0,3000)}
 ${liOn?`\nLINKEDIN:\n${liText.slice(0,2000)}`:''}`;
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+    const resp = await fetch('https://rejection-proxy.dzenk1981.workers.dev/',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
