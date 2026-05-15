@@ -520,7 +520,7 @@ ${liOn?`\nLINKEDIN:\n${liText.slice(0,2000)}`:''}`;
     const resp = await fetch('https://rejection-proxy.dzenk1981.workers.dev/',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,messages:[{role:'user',content:prompt}]})
     });
     clearInterval(timer);
     if(!resp.ok) throw new Error(`API ${resp.status}`);
