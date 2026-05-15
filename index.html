@@ -527,7 +527,7 @@ ${liOn?`\nLINKEDIN:\n${liText.slice(0,2000)}`:''}`;
     const apiData = await resp.json();
     if (apiData.error) throw new Error('API key error: ' + (apiData.error.message || JSON.stringify(apiData.error)));
     if (!apiData.content) throw new Error('Unexpected response: ' + JSON.stringify(apiData).slice(0,300));
-    const raw = apiData.content.map(b=>b.text||).join('').trim().replace(/```json|```/g,'').trim();
+    const raw = apiData.content.map(function(b){ return b.text || ''; }).join('').trim().replace(/```json|```/g, '').trim();
     const data = JSON.parse(raw);
 
     // Save to Supabase if HR requested
