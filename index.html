@@ -496,7 +496,7 @@ ${jdText.slice(0,3000)}
 ${liOn?`\nLINKEDIN:\n${liText.slice(0,2000)}`:''}`;
 
   try {
-    const resp = await fetch('https://rejection-proxy.dzenk1981.workers.dev/',{
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
@@ -504,7 +504,9 @@ ${liOn?`\nLINKEDIN:\n${liText.slice(0,2000)}`:''}`;
     clearInterval(timer);
     if(!resp.ok) throw new Error(`API ${resp.status}`);
     const apiData = await resp.json();
-    const raw = apiData.content.map(b=>b.text||'').join('').trim().replace(/```json|```/g,'').trim();
+    if (apiData.error) throw new Error('API key error: ' + (apiData.error.message || JSON.stringify(apiData.error)));
+    if (!apiData.content) throw new Error('Unexpected response: ' + JSON.stringify(apiData).slice(0,300));
+    const raw = apiData.content.map(b=>b.text||).join('').trim().replace(/```json|```/g,'').trim();
     const data = JSON.parse(raw);
 
     // Save to Supabase if HR requested
