@@ -471,25 +471,16 @@ function startLoading(type) {
 
 /* ══ MAIN ANALYSIS ══ */
 function buildPrompt(cvText, jdText, liOn, liText) {
-    var base = "You are a brutally honest senior recruiter with 20+ years experience. A candidate was rejected and wants to know exactly why.\n\n";
-    base += "Analyse their CV against the job description. Return ONLY valid JSON, no markdown, no preamble:\n\n";
-    base += "{\n";
-    base += "  \"ats_score\": 0,\n";
-    base += "  \"rejection_stage\": \"likely filtered by ATS\",\n";
-    base += "  \"overall_verdict\": \"your verdict here\",\n";
-    base += "  \"rejection_reasons\": [{\"title\":\"reason\",\"detail\":\"detail\"},{\"title\":\"reason\",\"detail\":\"detail\"},{\"title\":\"reason\",\"detail\":\"detail\"},{\"title\":\"reason\",\"detail\":\"detail\"}],\n";
-    base += "  \"keywords_missing\": [],\n";
-    base += "  \"keywords_weak\": [],\n";
-    base += "  \"keywords_present\": [],\n";
-    base += "  \"profile_mismatch\": null,\n";
-    base += "  \"recommendations\": [\"fix1\",\"fix2\",\"fix3\",\"fix4\",\"fix5\"]";
+    var p = "You are a brutally honest senior recruiter with 20 years experience. Analyse the CV and job description below.";
+    p += " Respond with ONLY a raw JSON object — no markdown, no backticks, no explanation before or after.";
+    p += " The JSON must have these exact keys: ats_score (integer 0-100), rejection_stage (string), overall_verdict (string), rejection_reasons (array of 4 objects each with title and detail keys), keywords_missing (array of strings), keywords_weak (array of strings), keywords_present (array of strings), profile_mismatch (string or null), recommendations (array of 5 strings).";
     if (liOn) {
-      base += ",\n  \"linkedin_score\": 0,\n  \"linkedin_vs_cv\": \"comparison\",\n  \"linkedin_gaps\": [],\n  \"linkedin_strengths\": []";
+      p += " Also include: linkedin_score (integer 0-100), linkedin_vs_cv (string), linkedin_gaps (array of strings), linkedin_strengths (array of strings).";
     }
-    base += "\n}\n\n";
-    base += "CV:\n" + cvText.slice(0, 4000) + "\n\nJOB DESCRIPTION:\n" + jdText.slice(0, 3000);
-    if (liOn) { base += "\n\nLINKEDIN:\n" + liText.slice(0, 2000); }
-    return base;
+    p += "\n\nCV:\n" + cvText.slice(0, 4000);
+    p += "\n\nJOB DESCRIPTION:\n" + jdText.slice(0, 3000);
+    if (liOn) { p += "\n\nLINKEDIN PROFILE:\n" + liText.slice(0, 2000); }
+    return p;
   }
 
   async function runAnalysis() {
