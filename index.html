@@ -290,10 +290,6 @@ input[type=file]{display:none;}
           </div>
           <div class="li-instructions"><strong>How to copy your LinkedIn content:</strong> Go to your LinkedIn profile → click "More" → "Save to PDF" and paste the text below. Or manually copy your About section and each experience entry.</div>
           <div class="field-group">
-            <div class="field-label">LinkedIn URL <small>optional</small></div>
-            <input type="text" id="li-url" placeholder="https://linkedin.com/in/yourname">
-          </div>
-          <div class="field-group">
             <div class="field-label">LinkedIn Profile Text <span>*</span></div>
             <textarea id="li-text" placeholder="Paste your LinkedIn About section, headline, and experience..." rows="6"></textarea>
           </div>
@@ -593,7 +589,7 @@ function resetCandidate(){
   document.getElementById('candidate-results').style.display='none';
   document.getElementById('candidate-results').innerHTML='';
   document.getElementById('candidate-form').style.display='block';
-  ['cv-text','jd-text','li-text','li-url','candidate-name'].forEach(id=>document.getElementById(id).value='');
+  ['cv-text','jd-text','li-text','candidate-name'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('li-toggle').checked=false;
   document.getElementById('hr-toggle').checked=false;
   document.getElementById('hr-submit-fields').style.display='none';
