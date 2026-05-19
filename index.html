@@ -538,7 +538,10 @@ function buildPrompt(cvText, jdText, liOn, liText) {
 }
 
 /* ── RENDER RESULTS ── */
+var lastAnalysisData = null;
+
 function renderResults(data, submissionId, liOn) {
+  lastAnalysisData = data;
   const score = data.ats_score||0;
   const color = scoreColor(score);
   const vClass = score>=75?'good':score>=55?'moderate':'critical';
@@ -580,9 +583,106 @@ function renderResults(data, submissionId, liOn) {
     ${data.profile_mismatch?`<div class="analysis-card"><div class="card-header"><div class="card-dot" style="background:var(--orange);"></div><div class="card-header-title">Profile mismatch</div></div><div class="card-body"><div class="verdict-text" style="font-size:14px;color:var(--text-muted);">${data.profile_mismatch}</div></div></div>`:''}
     ${liSection}
     <div class="analysis-card"><div class="card-header"><div class="card-dot" style="background:var(--blue);"></div><div class="card-header-title">What to fix before applying again</div></div><div class="card-body"><div class="rec-list">${recs}</div></div></div>
-    <button class="btn-secondary" onclick="resetCandidate()" style="margin-top:24px;margin-bottom:40px;">← Analyse another application</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:24px;margin-bottom:40px;">
+      <button class="btn-secondary" onclick="resetCandidate()">← Analyse another application</button>
+      <button onclick="downloadAnalysis()" style="padding:10px 20px;background:var(--accent);color:var(--navy);border:none;border-radius:var(--radius-sm);font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">↓ Download Report</button>
+    </div>
   `;
   document.getElementById('candidate-results').style.display='block';
+}
+
+function downloadAnalysis() {
+  var d = lastAnalysisData;
+  if (!d) return;
+  var date = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">';
+  html += '<title>Rejection Analysis Report</title>';
+  html += '<style>';
+  html += 'body{font-family:Arial,sans-serif;max-width:760px;margin:40px auto;padding:0 24px;color:#222;line-height:1.6;}';
+  html += 'h1{font-size:24px;color:#1F4E79;margin-bottom:4px;}';
+  html += '.sub{font-size:13px;color:#666;margin-bottom:32px;}';
+  html += 'h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#1F4E79;border-bottom:2px solid #1F4E79;padding-bottom:6px;margin-top:28px;}';
+  html += '.score{font-size:42px;font-weight:700;color:#1F4E79;line-height:1;}';
+  html += '.score-label{font-size:13px;color:#666;margin-bottom:16px;}';
+  html += '.verdict{background:#f5f9ff;border-left:4px solid #2E75B6;padding:12px 16px;margin:12px 0;font-size:14px;line-height:1.6;}';
+  html += '.reason{margin:10px 0;padding:12px 14px;background:#fafafa;border-radius:6px;border-left:3px solid #ddd;}';
+  html += '.reason.r1{border-color:#e85454;}.reason.r2{border-color:#e8874a;}.reason.r3{border-color:#e8c547;}.reason.r4{border-color:#ccc;}';
+  html += '.reason-num{display:inline-block;width:20px;height:20px;border-radius:4px;font-size:11px;font-weight:600;text-align:center;line-height:20px;margin-right:8px;}';
+  html += '.r1 .reason-num{background:#fdeaea;color:#e85454;}.r2 .reason-num{background:#fdf0e8;color:#e8874a;}.r3 .reason-num{background:#fdf8e8;color:#c9a82a;}.r4 .reason-num{background:#f0f0f0;color:#666;}';
+  html += '.reason strong{font-size:14px;}';
+  html += '.reason p{font-size:13px;color:#555;margin:4px 0 0;}';
+  html += '.tag{display:inline-block;font-size:12px;padding:3px 8px;border-radius:4px;margin:3px;font-family:monospace;}';
+  html += '.tag-red{background:#fdeaea;color:#c0392b;border:1px solid #f5c6c6;}';
+  html += '.tag-orange{background:#fdf0e8;color:#a04000;border:1px solid #f5c6a0;}';
+  html += '.tag-green{background:#eafaf1;color:#1a7a40;border:1px solid #a9dfbf;}';
+  html += '.mismatch{background:#fff8f0;border:1px solid #f5c6a0;border-radius:6px;padding:14px;font-size:14px;line-height:1.6;}';
+  html += '.rec{font-size:14px;margin:8px 0;padding:8px 14px;background:#f5f9ff;border-radius:4px;}';
+  html += '.rec::before{content:"→ ";color:#1F4E79;font-weight:600;}';
+  html += '.footer{font-size:11px;color:#999;margin-top:40px;padding-top:12px;border-top:1px solid #eee;text-align:center;}';
+  html += '</style></head><body>';
+  html += '<h1>Why Was I Rejected? — Analysis Report</h1>';
+  html += '<div class="sub">Generated: ' + date + ' &nbsp;|&nbsp; whywasirejected.app</div>';
+
+  // Score & stage
+  var scoreColor = d.ats_score >= 80 ? '#4aad7a' : d.ats_score >= 60 ? '#e8874a' : '#e85454';
+  html += '<h2>ATS Match Score</h2>';
+  html += '<div class="score" style="color:' + scoreColor + '">' + (d.ats_score||0) + '%</div>';
+  html += '<div class="score-label">' + (d.rejection_stage||'') + '</div>';
+  html += '<div class="verdict">' + (d.overall_verdict||'') + '</div>';
+
+  // Rejection reasons
+  if (d.rejection_reasons && d.rejection_reasons.length) {
+    html += '<h2>Most Likely Rejection Reasons</h2>';
+    d.rejection_reasons.forEach(function(r,i) {
+      html += '<div class="reason r' + (i+1) + '"><span class="reason-num">' + (i+1) + '</span><strong>' + r.title + '</strong><p>' + r.detail + '</p></div>';
+    });
+  }
+
+  // Keywords
+  if (d.keywords_missing && d.keywords_missing.length) {
+    html += '<h2>Keywords Missing</h2><div>';
+    d.keywords_missing.forEach(function(k){ html += '<span class="tag tag-red">' + k + '</span>'; });
+    html += '</div>';
+  }
+  if (d.keywords_weak && d.keywords_weak.length) {
+    html += '<h2>Present but Too Weak</h2><div>';
+    d.keywords_weak.forEach(function(k){ html += '<span class="tag tag-orange">' + k + '</span>'; });
+    html += '</div>';
+  }
+  if (d.keywords_present && d.keywords_present.length) {
+    html += '<h2>Keywords You Have</h2><div>';
+    d.keywords_present.forEach(function(k){ html += '<span class="tag tag-green">' + k + '</span>'; });
+    html += '</div>';
+  }
+
+  // Profile mismatch
+  if (d.profile_mismatch) {
+    html += '<h2>Profile Mismatch</h2><div class="mismatch">' + d.profile_mismatch + '</div>';
+  }
+
+  // LinkedIn
+  if (d.linkedin_score !== undefined) {
+    html += '<h2>LinkedIn Score: ' + d.linkedin_score + '%</h2>';
+    html += '<div class="verdict">' + (d.linkedin_vs_cv||'') + '</div>';
+  }
+
+  // Recommendations
+  if (d.recommendations && d.recommendations.length) {
+    html += '<h2>What to Fix Before Applying Again</h2>';
+    d.recommendations.forEach(function(r){ html += '<div class="rec">' + r + '</div>'; });
+  }
+
+  html += '<div class="footer">Generated by Why Was I Rejected? &nbsp;|&nbsp; https://dzenk1981-wq.github.io/no-HR-feedback/<br>© 2026 Peter Jankovic. All rights reserved.</div>';
+  html += '</body></html>';
+
+  var blob = new Blob([html], {type:'text/html'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'rejection-analysis-' + new Date().toISOString().slice(0,10) + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function resetCandidate(){
@@ -617,10 +717,148 @@ async function checkFeedback(){
   }
 
   if(data.hr_feedback){
-    area.innerHTML=`<div style="background:rgba(74,173,122,0.06);border:1px solid rgba(74,173,122,0.2);border-radius:var(--radius);padding:20px;margin-top:4px;"><div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--green);margin-bottom:8px;">HR Feedback received</div><div style="font-size:14px;color:var(--text);line-height:1.7;">${data.hr_feedback}</div><div style="font-size:12px;color:var(--text-muted);margin-top:12px;font-family:'DM Mono',monospace;">From: ${data.hr_reviewer||'HR Reviewer'} · ${fmtDate(data.hr_timestamp)}</div></div>`;
+    area.innerHTML=`<div style="background:rgba(74,173,122,0.06);border:1px solid rgba(74,173,122,0.2);border-radius:var(--radius);padding:20px;margin-top:4px;">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--green);margin-bottom:8px;">HR Feedback received</div>
+      <div style="font-size:14px;color:var(--text);line-height:1.7;" id="feedback-text-display">${data.hr_feedback}</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:12px;font-family:'DM Mono',monospace;">From: ${data.hr_reviewer||'HR Reviewer'} · ${fmtDate(data.hr_timestamp)}</div>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button onclick="downloadFeedback(${JSON.stringify({
+          id: data.id,
+          candidate: data.candidate_name,
+          feedback: data.hr_feedback,
+          reviewer: data.hr_reviewer||'HR Reviewer',
+          date: fmtDate(data.hr_timestamp),
+          aiVerdict: data.ai_analysis ? data.ai_analysis.overall_verdict : '',
+          atsScore: data.ai_analysis ? data.ai_analysis.ats_score : '',
+          rejectionStage: data.ai_analysis ? data.ai_analysis.rejection_stage : '',
+          reasons: data.ai_analysis ? data.ai_analysis.rejection_reasons : [],
+          recommendations: data.ai_analysis ? data.ai_analysis.recommendations : []
+        })})" style="padding:8px 18px;background:var(--accent);color:var(--navy);border:none;border-radius:var(--radius-sm);font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">
+          ↓ Download as PDF
+        </button>
+        <button onclick="downloadFeedbackTxt(${JSON.stringify({
+          id: data.id,
+          candidate: data.candidate_name,
+          feedback: data.hr_feedback,
+          reviewer: data.hr_reviewer||'HR Reviewer',
+          date: fmtDate(data.hr_timestamp),
+          aiVerdict: data.ai_analysis ? data.ai_analysis.overall_verdict : '',
+          atsScore: data.ai_analysis ? data.ai_analysis.ats_score : '',
+          reasons: data.ai_analysis ? data.ai_analysis.rejection_reasons : [],
+          recommendations: data.ai_analysis ? data.ai_analysis.recommendations : []
+        })})" style="padding:8px 18px;background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Instrument Sans',sans-serif;font-size:13px;cursor:pointer;">
+          ↓ Download as TXT
+        </button>
+      </div>
+    </div>`;
   } else {
     area.innerHTML=`<div class="verdict-card moderate"><div class="verdict-tag">Pending review</div><div class="verdict-text">Your submission <span style="font-family:'DM Mono',monospace;">${id}</span> is in the queue. No HR feedback yet — check back soon.</div></div>`;
   }
+}
+
+/* ══ DOWNLOAD FEEDBACK ══ */
+function downloadFeedbackTxt(d) {
+  var lines = [];
+  lines.push('WHY WAS I REJECTED? — Feedback Report');
+  lines.push('=====================================');
+  lines.push('');
+  lines.push('Submission ID: ' + d.id);
+  lines.push('Candidate: ' + (d.candidate || 'Anonymous'));
+  lines.push('Date: ' + d.date);
+  lines.push('');
+  lines.push('AI ANALYSIS');
+  lines.push('-----------');
+  lines.push('ATS Match Score: ' + d.atsScore + '%');
+  lines.push('Rejection Stage: ' + d.rejectionStage);
+  lines.push('');
+  lines.push('Overall Verdict:');
+  lines.push(d.aiVerdict || '');
+  lines.push('');
+  if (d.reasons && d.reasons.length) {
+    lines.push('Top Rejection Reasons:');
+    d.reasons.forEach(function(r, i) {
+      lines.push((i+1) + '. ' + r.title);
+      lines.push('   ' + r.detail);
+    });
+    lines.push('');
+  }
+  if (d.recommendations && d.recommendations.length) {
+    lines.push('What to Fix:');
+    d.recommendations.forEach(function(r, i) {
+      lines.push((i+1) + '. ' + r);
+    });
+    lines.push('');
+  }
+  lines.push('HR PROFESSIONAL FEEDBACK');
+  lines.push('------------------------');
+  lines.push('From: ' + d.reviewer);
+  lines.push('');
+  lines.push(d.feedback || '');
+  lines.push('');
+  lines.push('---');
+  lines.push('Generated by Why Was I Rejected? — https://dzenk1981-wq.github.io/no-HR-feedback/');
+  lines.push('© 2026 Peter Jankovic');
+
+  var blob = new Blob([lines.join('\n')], {type: 'text/plain'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'rejection-feedback-' + d.id + '.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadFeedback(d) {
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">';
+  html += '<title>Rejection Feedback Report — ' + d.id + '</title>';
+  html += '<style>';
+  html += 'body{font-family:Arial,sans-serif;max-width:760px;margin:40px auto;padding:0 24px;color:#222;line-height:1.6;}';
+  html += 'h1{font-size:24px;color:#1F4E79;margin-bottom:4px;}';
+  html += '.sub{font-size:13px;color:#666;margin-bottom:32px;}';
+  html += 'h2{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#1F4E79;border-bottom:2px solid #1F4E79;padding-bottom:6px;margin-top:28px;}';
+  html += '.score{font-size:36px;font-weight:700;color:#1F4E79;}';
+  html += '.verdict{background:#f5f9ff;border-left:4px solid #2E75B6;padding:12px 16px;margin:12px 0;font-size:14px;}';
+  html += '.reason{margin:10px 0;padding:10px 14px;background:#fafafa;border-radius:6px;}';
+  html += '.reason strong{display:block;font-size:14px;margin-bottom:3px;}';
+  html += '.reason span{font-size:13px;color:#555;}';
+  html += '.feedback-box{background:#f0faf5;border:1px solid #4aad7a;border-radius:8px;padding:20px;margin:12px 0;}';
+  html += '.rec{font-size:14px;margin:6px 0;padding-left:16px;}';
+  html += '.rec::before{content:"→ ";color:#1F4E79;}';
+  html += '.footer{font-size:11px;color:#999;margin-top:40px;padding-top:12px;border-top:1px solid #eee;}';
+  html += '</style></head><body>';
+  html += '<h1>Why Was I Rejected? — Feedback Report</h1>';
+  html += '<div class="sub">Submission ID: ' + d.id + ' &nbsp;|&nbsp; Candidate: ' + (d.candidate||'Anonymous') + ' &nbsp;|&nbsp; ' + d.date + '</div>';
+  html += '<h2>AI Analysis</h2>';
+  html += '<div class="score">' + d.atsScore + '%</div>';
+  html += '<div style="font-size:13px;color:#666;margin-bottom:8px;">ATS Match Score &nbsp;·&nbsp; ' + (d.rejectionStage||'') + '</div>';
+  html += '<div class="verdict">' + (d.aiVerdict||'') + '</div>';
+  if (d.reasons && d.reasons.length) {
+    html += '<h2>Top Rejection Reasons</h2>';
+    d.reasons.forEach(function(r, i) {
+      html += '<div class="reason"><strong>' + (i+1) + '. ' + r.title + '</strong><span>' + r.detail + '</span></div>';
+    });
+  }
+  if (d.recommendations && d.recommendations.length) {
+    html += '<h2>What to Fix</h2>';
+    d.recommendations.forEach(function(r) {
+      html += '<div class="rec">' + r + '</div>';
+    });
+  }
+  html += '<h2>HR Professional Feedback</h2>';
+  html += '<div class="feedback-box">';
+  html += '<div style="font-size:14px;line-height:1.7;">' + (d.feedback||'').replace(/\n/g,'<br>') + '</div>';
+  html += '<div style="font-size:12px;color:#666;margin-top:12px;">From: ' + d.reviewer + ' &nbsp;·&nbsp; ' + d.date + '</div>';
+  html += '</div>';
+  html += '<div class="footer">Generated by Why Was I Rejected? &nbsp;|&nbsp; https://dzenk1981-wq.github.io/no-HR-feedback/<br>© 2026 Peter Jankovic. All rights reserved.</div>';
+  html += '</body></html>';
+
+  var blob = new Blob([html], {type: 'text/html'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'rejection-feedback-' + d.id + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 /* ══ HR LOGIN ══ */
